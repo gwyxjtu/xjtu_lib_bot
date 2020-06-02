@@ -114,6 +114,12 @@ class XJTUUser(object):
 
 
         while(1):
+            r_w3=self.session.get('http://rg.lib.xjtu.edu.cn:8010/qseat?sp=west3B')#兴庆区的，别的区得自行修改了
+            r_e3=self.session.get('http://rg.lib.xjtu.edu.cn:8010/qseat?sp=east3A')
+            #print('各层座位数量',end = '')
+            #print(json.loads(r_e3.text)['scount'])
+            s1 = json.loads(r_e3.text)['seat']
+            s2 = json.loads(r_w3.text)['seat']
             for i in s1:
                 if s1[i] == 0:
                     print(i)
