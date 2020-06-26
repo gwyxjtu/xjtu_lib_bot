@@ -31,7 +31,7 @@ class XJTUUser(object):
             dom = etree.HTML(r.text)
             a_text = dom.xpath('/html/body/div[2]/center/div[1]/div/div/div/div/div/div[1]/h3/text()[2]')
             jjj = dom.xpath('/html/body/div[2]/center/div[1]/div/div/div/div/div/div[2]/center/h3[1]')
-            if(len(jjj)<=1):
+            if(len(jjj)<1):
                 print('没弄上，出现错误')
                 return 0;
             if jjj[0].text == '已取消' or jjj[0].text == '已离馆':
