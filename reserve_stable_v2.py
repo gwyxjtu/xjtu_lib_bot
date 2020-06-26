@@ -34,7 +34,7 @@ class XJTUUser(object):
             if(len(jjj)<1):
                 print('没弄上，出现错误')
                 return 0;
-            if jjj[0].text == '已取消' or jjj[0].text == '已离馆':
+            if jjj[0].text == '已取消' or jjj[0].text == '已离馆' or jjj[0].text == '超时未入馆':
                 print('没弄上，出现错误')
                 return 0
             else:
