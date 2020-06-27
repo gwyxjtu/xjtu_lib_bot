@@ -28,13 +28,13 @@ class XJTUUser(object):
         #--------------------------------------
         def vxpush(self,msg):
             url = 'http://wxpusher.zjiecode.com/api/send/message'
-            uid = 'UID_f6KW1qbvStLZLLDAuqcnjUiIRw3Z' 
+            uid = 'UID_**************3Z' 
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
                 'Content-Type':'application/json;charset=UTF-8'
             }
             data = {
-            'appToken':'AT_RL7e2VT7HZYC7YttQ8RIHvvtRrGIJdRh',
+            'appToken':'AT_R************',
             'content': msg,
             'contentType':1,
             'uids':[uid]
