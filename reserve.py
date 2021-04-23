@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # @Author  : Guoguo
-# @FileName: morning.py
 # @Blog    ：https://gwyxjtu.github.io
 import os
 import time
@@ -9,6 +8,10 @@ import base64
 import requests
 from Crypto.Cipher import AES
 import re
+from lxml import etree
+from threading import Thread
+
+our_seat = []
 
 class XJTUUser(object):
 
@@ -20,10 +23,31 @@ class XJTUUser(object):
         self.session = requests.Session()
         self.session.headers.update(config['headers'])
         self.session.cookies.update(config['cookies'])
+        #self.region = 
 
     def login(self):
+
+        #--------------------------------------
+        def check_my_seat(self):#返回你的座位字符穿
+            r = self.session.get('http://rg.lib.xjtu.edu.cn:8086/my/')
+            dom = etree.HTML(r.text)
+            a_text = dom.xpath('/html/body/div[2]/center/div[1]/div/div/div/div/div/div[1]/h3/text()[2]')
+            jjj = dom.xpath('/html/body/div[2]/center/div[1]/div/div/div/div/div/div[2]/center/h3[1]')
+            if(len(jjj)<1):
+                print('没弄上1，出现错误')
+                return 0;
+            if jjj[0].text == '已取消' or jjj[0].text == '已离馆' or jjj[0].text == '超时未入馆':
+                print('没弄上，出现错误')
+                return 0
+            else:
+                print('弄好了'+str(a_text))
+                our_seat.append(str(a_text))
+                return 1
+
+            
+
         def reserve(self,kid,sp):
-            r = self.session.get('http://rg.lib.xjtu.edu.cn:8010/ruguan')#入关
+            r = self.session.get('http://rg.lib.xjtu.edu.cn:8086/ruguan')#入关
             #print('--------------------------')
             nn = r.text.find('<input id="csrf_token" name="csrf_token" type="hidden" value=')
             tok = r.text[nn+1+len('<input id="csrf_token" name="csrf_token" type="hidden" value='):nn+56+len('<input id="csrf_token" name="csrf_token" type="hidden" value=')]
@@ -35,30 +59,19 @@ class XJTUUser(object):
             'submit':'%E6%8F%90%E4%BA%A4',
             'rplace':'east'
             }#入关post,比较麻烦
-            r = self.session.post('http://rg.lib.xjtu.edu.cn:8010/ruguan',data = data)#提交
+            r = self.session.post('http://rg.lib.xjtu.edu.cn:8086/ruguan',data = data)#提交
             
-            r = self.session.get('http://rg.lib.xjtu.edu.cn:8010/seat/?kid='+kid+'&sp='+sp)
+            r = self.session.get('http://rg.lib.xjtu.edu.cn:8086/seat/?kid='+kid+'&sp='+sp)
             #print(r.text)
             #------------------------------新版判断
             #兴庆区的，别的区得自行修改了
-            if(sp == 'west3B'):
-                r_w3=self.session.get('http://rg.lib.xjtu.edu.cn:8010/qseat?sp=west3B')
-                s2 = json.loads(r_w3.text)['seat']
-                if(s2[kid] == 1):
-                    return 200
-                else:
-                    print('预约了但是没有成功,肯定是你已经预约过了')
-                    exit(0)
-                    return 0
-            if(sp == 'east3A'):
-                r_w3=self.session.get('http://rg.lib.xjtu.edu.cn:8010/qseat?sp=east3A')
-                s2 = json.loads(r_w3.text)['seat']
-                if(s2[kid] == 1):
-                    return 200
-                else:
-                    print('预约了但是没有成功，肯定是你已经预约过了')
-                    exit(0)
-                    return 0
+            if check_my_seat(self) == 1:
+                print('预约成功'+str(check_my_seat(self)))
+                return 1
+            else:
+                print('预约失败')
+                return 0
+
             return r.status_code
         def encrypt_pwd(raw_pwd, publicKey='0725@pwdorgopenp'):
             ''' AES-ECB encrypt '''
@@ -81,7 +94,7 @@ class XJTUUser(object):
         _headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
         # start with 302 redirection from ehall
-        _r = self.session.get('http://rg.lib.xjtu.edu.cn:8010/auth/login/?next=%2Fseat%2F')
+        _r = self.session.get('http://rg.lib.xjtu.edu.cn:8086/auth/login/?next=%2Fseat%2F')
 
         # get cookie route
         self.session.get('https://org.xjtu.edu.cn/openplatform/login.html')
@@ -124,51 +137,77 @@ class XJTUUser(object):
         r=self.session.get('http://rg.lib.xjtu.edu.cn:8080/bxusr/link.jsp?uid='+self.config['username']+'&cn=%E9%83%AD%E7%8E%8B%E6%87%BF&employeeNumber='+self.config['person_id']+'&depId=%E7%94%B5%E5%AD%90%E4%B8%8E%E4%BF%A1%E6%81%AF%E5%AD%A6%E9%83%A8&mobile')#&email=867718012@qq.com去掉了
         #print(r.text)
         #---------------------登陆成功------------------------
-        r_w3=self.session.get('http://rg.lib.xjtu.edu.cn:8010/qseat?sp=west3B')#兴庆区的，别的区得自行修改了
-        r_e3=self.session.get('http://rg.lib.xjtu.edu.cn:8010/qseat?sp=east3A')
+
         #print(r_w3.text)
         #print('各层座位数量',end = '')
         #print(json.loads(r_e3.text)['scount'])
-        s1 = json.loads(r_e3.text)['seat']
-        s2 = json.loads(r_w3.text)['seat']
         #s.update(json.loads(r_w3.text)['seat'])/seat/?kid=015&sp=north4southwest
-        print(s1,s2)
+        #print(s1,s2)
 
 
-
-        my_list = ['X115','X117','X113','X109','X111']
-        #reserve(self,'X155','east3A')
+        #check_my_seat(self)
+        #my_list = ['G054','G018','G005','G029','G054','G066']
+        ii=0
         while(1):
-            r_w3=self.session.get('http://rg.lib.xjtu.edu.cn:8010/qseat?sp=west3B')#兴庆区的，别的区得自行修改了
-            r_e3=self.session.get('http://rg.lib.xjtu.edu.cn:8010/qseat?sp=east3A')
-            #print('各层座位数量',end = '')
-            #print(json.loads(r_e3.text)['scount'])
-            s1 = json.loads(r_e3.text)['seat']
-            s2 = json.loads(r_w3.text)['seat']
-            print(s1,s2)
-            for i in my_list:
-                if s1[i] == 0:
-                    print(i)
-                    if reserve(self,i,'east3A') == 200:
-                        print('三楼东侧侧你的座位号是'+i)
-                        exit(0)
-            for i in s1:
-                if s1[i] == 0:
-                    print(i)
-                    if reserve(self,i,'east3A') == 200:
-                        print('三楼东侧侧你的座位号是'+i)
-                        exit(0)
-            for i in s2:
-                if s2[i] == 0:
-                    print(i)
-                    if reserve(self,i,'west3B') == 200:
-                        print('三楼西侧你的座位号是'+i)
-                        exit(0)
-            time.sleep(2)
+            ii+=1
+            r=self.session.get('http://rg.lib.xjtu.edu.cn:8086/qseat?sp='+self.config['region'])#兴庆区的，别的区得自行修改了
 
+            #print('各层座位数量',end = '')
+            s = json.loads(r.text)['seat']
+            print('循环次数：')
+            print(ii)
+
+                #i = 'G054'
+            if self.config['seat_id'] == '':
+                for i in s:
+                    if reserve(self,i,self.config['region']) == 1:
+                        return(0)
+                    else:
+                        print('预约失败')
+                        return(1)   
+                continue
+
+            if s[self.config['seat_id']] == 0:
+                
+                print(self.config['seat_id'])
+                if reserve(self,self.config['seat_id'],self.config['region']) == 1:
+                    return(0)
+                else:
+                    print('预约失败')
+                    return(1)
+                
+            #s=s.pop('')
+            #print(s)
+            # for i in s:   
+            #     if len(i)>0:
+                    
+            #         if i[0] == 'F' or i[0] == 'G':
+            #             if s[i] == 0:
+            #                 print(i)
+            #                 if reserve(self,i,'north4east') == 1:
+            #                     return(0)
+
+            time.sleep(3)
 
 if __name__ == '__main__':
-    #print('begin')
-    #time.sleep(18600)
-    guoguo = XJTUUser()
+
+    guoguo = XJTUUser('./config.json')
+    dt = '2021-04-23 05:55:01'
+    ts = int(time.mktime(time.strptime(dt, "%Y-%m-%d %H:%M:%S")))
+
+    t = int(time.time())
+    cha = ts - t
+    while cha >0:
+        t = int(time.time())
+        cha = ts - t 
+        time.sleep(1)
+        if(cha%10 == 0):
+            print(cha)
+    print("开始")
+    
+    #guoguo.login()
+    #别的人就分别建立新的结构体就行
+    #ruo = XJTUUser('./config_1.json')
     guoguo.login()
+    #zxz.login()
+    exit(0)
