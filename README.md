@@ -6,9 +6,9 @@
 在config中修改用户名和密码,personid是学号，password是密码，username是netid号码，seat_id和region分别是座位号和座位区域，cookie和headers不需要修改。座位参数详见后面参数表
 
 
-修改完config.json成后直接运行reserve.py。
+修改完config.json成后直接运行reserve.py，或者修改主函数中的日期调整到第二天，并在夜间保证电脑开机，可以在第二天早上五点五十五抢到座位。
 
-如果座位号seat_id为空则随即预约当前region的一个座位。
+**如果座位号seat_id为空则随即预约当前region的一个座位。**
 
 
 
